@@ -43,15 +43,9 @@
     <ClCompile Include="GlobalHotkey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GlobalNativeEventFilter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="GlobalHotkey.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="GlobalNativeEventFilter.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -3,15 +3,12 @@
 GlobalHotkey::GlobalHotkey(QObject *parent)
 	: QObject(parent),m_isRegistered(false)
 {
-	mp_nativeEventFilter = new GlobalNativeEventFilter(this);
-
-	mp_app->installNativeEventFilter(mp_nativeEventFilter);
 }
 
 GlobalHotkey::GlobalHotkey()
 	: m_isRegistered(false)
 {
-	mp_nativeEventFilter = new GlobalNativeEventFilter(this);
+
 }
 
 GlobalHotkey::~GlobalHotkey()
@@ -24,14 +21,14 @@ GlobalHotkey::~GlobalHotkey()
 
 bool GlobalHotkey::registerHotkey()
 {
-	connect(mp_nativeEventFilter, &GlobalNativeEventFilter::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
+	connect(this, &GlobalHotkey::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
 	
 	return true;
 }
 
 bool GlobalHotkey::unregisterHotkey()
 {
-	disconnect(mp_nativeEventFilter, &GlobalNativeEventFilter::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
+	disconnect(this, &GlobalHotkey::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
 	m_isRegistered = false;
 	
 	return UnregisterHotKey(0, (quint32)getNativeModifiers(m_modifiers) ^ (quint32)getNativeKeycode(m_keycode));
@@ -56,6 +53,24 @@ bool GlobalHotkey::setHotkey(QString keyStr)
 		m_isRegistered = false;
 		return false;
 	}
+}
+
+bool GlobalHotkey::nativeEventFilter(const QByteArray &eventType, void *message, long *)
+{
+	//参考https://doc.qt.io/qt-5/qabstractnativeeventfilter.html
+	if (eventType == "windows_generic_MSG" || eventType == "windows_dispatcher_MSG")
+	{
+		//消息结构类型转换
+		//MSG *msg = static_cast<MSG *>(message);
+		MSG *msg = reinterpret_cast<MSG *>(message);
+		//如果消息类型是热键触发，则发射信号并返回true
+		if (msg->message == WM_HOTKEY)
+		{
+			emit activeHotkeyEvent();
+			return true;
+		}
+	}
+	return false;
 }
 
 void GlobalHotkey::on_activeHotkeyEvent()

@@ -89,15 +89,11 @@
     <QtUic Include="HotkeyDemo.ui" />
     <QtMoc Include="HotkeyDemo.h" />
     <ClCompile Include="GlobalHotkey.cpp" />
-    <ClCompile Include="GlobalNativeEventFilter.cpp" />
     <ClCompile Include="HotkeyDemo.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="GlobalHotkey.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <QtMoc Include="GlobalNativeEventFilter.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

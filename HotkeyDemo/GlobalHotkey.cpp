@@ -3,20 +3,42 @@
 GlobalHotkey::GlobalHotkey(QObject *parent)
 	: QObject(parent),m_isRegistered(false)
 {
+	
 }
 
 GlobalHotkey::GlobalHotkey()
 	: m_isRegistered(false)
 {
+	
+}
 
+
+GlobalHotkey* GlobalHotkey::mp_instance = nullptr;
+
+GlobalHotkey& GlobalHotkey::getInstance()
+{
+	if (mp_instance == nullptr)
+	{
+		mp_instance = new GlobalHotkey;
+	}
+	
+	return *mp_instance;
+}
+
+void GlobalHotkey::setInstancParent(QObject *parent)
+{
+	mp_instance->setParent(parent);
 }
 
 GlobalHotkey::~GlobalHotkey()
 {
 	if (m_isRegistered)
 	{
+		m_isRegistered = false;
 		unregisterHotkey();
 	}
+
+	
 }
 
 bool GlobalHotkey::registerHotkey()

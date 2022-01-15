@@ -5,8 +5,8 @@
 #include <QHash>
 #include <windows.h>
 #include <QAbstractNativeEventFilter>
+#include <QDebug>
 
-class GlobalHotkey;
 
 class GlobalHotkey : public QObject, public QAbstractNativeEventFilter
 {
@@ -14,13 +14,13 @@ class GlobalHotkey : public QObject, public QAbstractNativeEventFilter
 
 public:
 
-	GlobalHotkey();
 
-	GlobalHotkey(QObject *parent);
+	static GlobalHotkey& getInstance();
+
+	void setInstancParent(QObject *parent);
 
 	~GlobalHotkey();
 	
-
 	bool registerHotkey();
 
 	bool unregisterHotkey();
@@ -29,24 +29,35 @@ public:
 
 	virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
 
+
+
 public slots:
 	void on_activeHotkeyEvent();
 
 private:
-	
-	bool m_isRegistered;
 
-	QApplication *mp_app;
+
+
+	quint32 getNativeKeycode(Qt::Key keycode);
+
+	quint32 getNativeModifiers(Qt::KeyboardModifiers modifiers);
+
+	GlobalHotkey();
+
+	GlobalHotkey(QObject *parent);
+
+private:
+	
+
+	static GlobalHotkey* mp_instance;
+
+	bool m_isRegistered;
 
 	QKeySequence m_keySeq;
 	Qt::Key m_keycode;
 	Qt::KeyboardModifiers m_modifiers;
 
-private:
 
-	quint32 getNativeKeycode(Qt::Key keycode);
-
-	quint32 getNativeModifiers(Qt::KeyboardModifiers modifiers);
 
 signals:
 	//

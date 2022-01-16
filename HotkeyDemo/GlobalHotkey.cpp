@@ -32,49 +32,75 @@ void GlobalHotkey::setInstancParent(QObject *parent)
 
 GlobalHotkey::~GlobalHotkey()
 {
-	if (m_isRegistered)
+	if (!m_hotkeyIndex.isEmpty())
 	{
-		m_isRegistered = false;
-		unregisterHotkey();
+		undoAllHotkey();
 	}
-
-	
 }
 
-bool GlobalHotkey::registerHotkey()
+
+
+int GlobalHotkey::undoAllHotkey()
 {
-	connect(this, &GlobalHotkey::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
+	int count(0);
+	for(QHash<QPair<quint32, quint32>, int>::iterator it = m_hotkeyIndex.begin();it != m_hotkeyIndex.end(); ++it)
+	{
+		QPair<quint32, quint32> temp = it.key();
+		bool ret = UnregisterHotKey(0, temp.second ^ temp.first);
+		count++;
+	}
 	
-	return true;
+	m_hotkeyIndex.clear();
+	return count;
 }
 
-bool GlobalHotkey::unregisterHotkey()
-{
-	disconnect(this, &GlobalHotkey::activeHotkeyEvent, this, &GlobalHotkey::on_activeHotkeyEvent);
-	m_isRegistered = false;
-	
-	return UnregisterHotKey(0, (quint32)getNativeModifiers(m_modifiers) ^ (quint32)getNativeKeycode(m_keycode));
-}
 
-bool GlobalHotkey::setHotkey(QString keyStr)
+bool GlobalHotkey::setHotkey(const QString& keyStr, int signalIndex)
 {
 	QKeySequence keySeq = QKeySequence(keyStr);
 	Qt::KeyboardModifiers allMods = Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier;
 	m_keycode = (keySeq.isEmpty() ? Qt::Key(0) : Qt::Key((keySeq[0] ^ allMods) & keySeq[0]));
 	m_modifiers = keySeq.isEmpty() ? Qt::KeyboardModifiers(0) : Qt::KeyboardModifiers(keySeq[0] & allMods);
-	
+
 	const quint32 nativeKey = getNativeKeycode(m_keycode);
 	const quint32 nativeMods = getNativeModifiers(m_modifiers);
 
+	if (m_hotkeyIndex.contains(qMakePair(nativeKey, nativeMods)))
+	{
+		return false;
+	}
+
+	
 	//m_hotkey.insert(qMakePair(nativeKey, nativeMods), this);
-	if(RegisterHotKey(0, nativeMods ^ nativeKey, nativeMods, nativeKey)){
+	if (RegisterHotKey(0, nativeMods ^ nativeKey, nativeMods, nativeKey)) {
 		m_isRegistered = true;
+		m_hotkeyIndex.insert(qMakePair(nativeKey, nativeMods), signalIndex);
 		return true;
 	}
 	else {
 		m_isRegistered = false;
 		return false;
 	}
+}
+
+bool GlobalHotkey::undoSetHotkey(const QString& keyStr)
+{
+	QKeySequence keySeq = QKeySequence(keyStr);
+	Qt::KeyboardModifiers allMods = Qt::ShiftModifier | Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier;
+	m_keycode = (keySeq.isEmpty() ? Qt::Key(0) : Qt::Key((keySeq[0] ^ allMods) & keySeq[0]));
+	m_modifiers = keySeq.isEmpty() ? Qt::KeyboardModifiers(0) : Qt::KeyboardModifiers(keySeq[0] & allMods);
+
+	const quint32 nativeKey = getNativeKeycode(m_keycode);
+	const quint32 nativeMods = getNativeModifiers(m_modifiers);
+
+
+	if (m_hotkeyIndex.remove(qMakePair(nativeKey, nativeMods)))
+	{
+		return UnregisterHotKey(0, nativeMods ^ nativeKey);
+	}
+	//没有设置此快捷键，返回false
+	return false;
+	
 }
 
 bool GlobalHotkey::nativeEventFilter(const QByteArray &eventType, void *message, long *)
@@ -88,17 +114,23 @@ bool GlobalHotkey::nativeEventFilter(const QByteArray &eventType, void *message,
 		//如果消息类型是热键触发，则发射信号并返回true
 		if (msg->message == WM_HOTKEY)
 		{
-			emit activeHotkeyEvent();
+			const quint32 keycode = HIWORD(msg->lParam);
+			const quint32 modifiers = LOWORD(msg->lParam);
+			int hotkeyIndex = m_hotkeyIndex.value(qMakePair(keycode, modifiers));
+			
+			emit hotkeyPressEvent(hotkeyIndex);
+
+
 			return true;
 		}
 	}
 	return false;
 }
 
-void GlobalHotkey::on_activeHotkeyEvent()
-{
-	emit activateHotkey();
-}
+//void GlobalHotkey::on_activeHotkeyEvent()
+//{
+//	emit activateHotkey();
+//}
 
 quint32 GlobalHotkey::getNativeKeycode(Qt::Key keycode)
 {

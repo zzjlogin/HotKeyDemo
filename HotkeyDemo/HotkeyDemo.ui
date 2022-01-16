@@ -1,25 +1,41 @@
-<UI version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>HotkeyDemoClass</class>
- <widget class="QWidget" name="HotkeyDemoClass" >
-  <property name="objectName" >
-   <string notr="true">HotkeyDemoClass</string>
-  </property>
-  <property name="geometry" >
+ <widget class="QWidget" name="HotkeyDemoClass">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>374</width>
+    <height>259</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>HotkeyDemo</string>
-  </property>$centralwidget$
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QKeySequenceEdit" name="keySeqEdit_main"/>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_registerHotkey">
+       <property name="text">
+        <string>PushButton</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QPlainTextEdit" name="textEdit_show"/>
+   </item>
+  </layout>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
  <resources>
-   <include location="HotkeyDemo.qrc"/>
+  <include location="HotkeyDemo.qrc"/>
  </resources>
  <connections/>
-</UI>
+</ui>

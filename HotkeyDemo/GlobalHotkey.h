@@ -1,7 +1,13 @@
-#pragma once
+#ifndef     __GLOBALHOTKEY__
+#define     __GLOBALHOTKEY__
+/*******************************
+ * date 2022/01/16 17:18
+ * author admin
+ *******************************/
 
 #include <QObject>
 #include <QKeySequence>
+#include <QMap>
 #include <QHash>
 #include <windows.h>
 #include <QAbstractNativeEventFilter>
@@ -20,19 +26,21 @@ public:
 	void setInstancParent(QObject *parent);
 
 	~GlobalHotkey();
-	
-	bool registerHotkey();
 
-	bool unregisterHotkey();
 
-	bool setHotkey(QString keyStr);
+
+
+	int undoAllHotkey();
+
+	bool setHotkey(const QString& keyStr, int signalIndex);
+
+	bool undoSetHotkey(const QString& keyStr);
 
 	virtual bool nativeEventFilter(const QByteArray &eventType, void *message, long *);
 
 
 
-public slots:
-	void on_activeHotkeyEvent();
+
 
 private:
 
@@ -47,7 +55,7 @@ private:
 	GlobalHotkey(QObject *parent);
 
 private:
-	
+	QHash<QPair<quint32, quint32>, int> m_hotkeyIndex;
 
 	static GlobalHotkey* mp_instance;
 
@@ -60,8 +68,12 @@ private:
 
 
 signals:
-	//
-	void activateHotkey();
-	
-	void activeHotkeyEvent();
+
+
+
+	void hotkeyPressEvent(int);
 };
+
+
+#endif
+

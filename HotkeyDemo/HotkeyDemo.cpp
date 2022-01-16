@@ -30,6 +30,6 @@ void HotkeyDemo::on_btn_registerHotkey_clicked()
 void HotkeyDemo::getHotkey(int hotkey)
 {
 	
-	ui.textEdit_show->setPlainText(m_hotkeyMap.value(hotkey));
+	ui.textEdit_show->setPlainText(QString::fromLocal8Bit("已经按下：")+m_hotkeyMap.value(hotkey));
 
 }
